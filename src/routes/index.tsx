@@ -1,0 +1,37 @@
+import { createBrowserRouter } from "react-router-dom";
+import AppWrapperLayout from "../layouts/AppWrapperLayout";
+import RootLayout from "../layouts/RootLayout";
+import DashboardPage from "../pages/DashboardPage";
+import SignInPage from "../pages/SignInPage";
+import SignUpPage from "../pages/SignUpPage";
+import ProtectedRouteComponent from "../components/protected.route";
+
+export const routes = createBrowserRouter([
+  {
+    path: "/",
+    element: <AppWrapperLayout />,
+    children: [
+      {
+        element: (
+          <ProtectedRouteComponent>
+            <RootLayout />
+          </ProtectedRouteComponent>
+        ),
+        children: [
+          {
+            index: true,
+            element: <DashboardPage />,
+          },
+        ],
+      },
+      {
+        path: "sign-in",
+        element: <SignInPage />,
+      },
+      {
+        path: "sign-up",
+        element: <SignUpPage />,
+      },
+    ],
+  },
+]);
