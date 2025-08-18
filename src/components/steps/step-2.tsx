@@ -1,47 +1,60 @@
-import "../../assets/styles/input.css";
-import SelectInput from "../ui/SelectInput";
+import { useGetProfileQuestions } from "../../hooks/requests/useGetProfileQuestions";
+import Select from "../ui/SelectInput";
+import RadioGroup from "../ui/RadioGroup";
+import { useQuestionStore } from "../../store/QuestionStore"; // Zustand store
+import useSubmitAnswer from "../../hooks/requests/useSubmitAnswer"; // useMutation
+
+export interface IOptions {
+  option_text: string;
+  option_value: string;
+}
+
+export interface IQuestions {
+  id: string;
+  question_text: string;
+  question_type: string;
+  is_required: boolean;
+  options?: IOptions[];
+}
 
 const Step2 = () => {
-  return (
-    <div className="max-w-[403px]">
-      <form className="flex w-full flex-col gap-y-[31px] mt-[33px]">
-        <SelectInput
-          label="Why will you use the service?"
-          options={[
-            { value: "work", label: "Work" },
-            { value: "personal", label: "Personal" },
-            { value: "education", label: "Education" },
-            { value: "research", label: "Research" },
-            { value: "other", label: "Other" },
-          ]}
-        />
-        <SelectInput
-          label="What describes you best?"
-          options={[
-            { value: "businessowner", label: "Business Owner" },
-            { value: "student", label: "Student" },
-            { value: "professional", label: "Professional" },
-            { value: "entrepreneur", label: "Entrepreneur" },
-            { value: "freelancer", label: "Freelancer" },
-            { value: "hobbyist", label: "Hobbyist" },
-            { value: "other", label: "Other" },
-          ]}
-        />
-        <div className="flex items-center justify-between">
-          <label className="label">What describes you best?</label>
-          <div className="flex items-center gap-[14px]">
-            <label className="flex items-center gap-1 cursor-pointer">
-              <input type="radio" name="desc" value="yes" />
-              <span>Yes</span>
-            </label>
+  const { data, isError, isSuccess } = useGetProfileQuestions(2); // Savollarni olish
+  const { setAnswer } = useQuestionStore(); // Zustand store`ga javoblarni saqlash
+  const { mutateAsync } = useSubmitAnswer(); // API so'rovini yuborish
 
-            <label className="flex items-center gap-1 cursor-pointer">
-              <input type="radio" name="desc" value="no" />
-              <span>No</span>
-            </label>
-          </div>
-        </div>
-      </form>
+  const questions: IQuestions[] = data?.data;
+
+  const handleAnswerChange = (questionId: string, answer: string) => {
+    setAnswer(questionId, answer); // Javobni Zustand store`ga saqlash
+  };
+
+  return (
+    <div className="flex flex-col gap-y-6">
+      {questions &&
+        questions.length >= 1 &&
+        questions.map((question) => {
+          if (question.question_type === "select") {
+            return (
+              <Select
+                key={question.id}
+                question_text={question.question_text}
+                options={question.options || []}
+                onChange={(answer) => handleAnswerChange(question.id, answer)} // Javobni saqlash
+              />
+            );
+          }
+          if (question.question_type === "radio") {
+            return (
+              <RadioGroup
+                key={question.id}
+                question_text={question.question_text}
+                options={question.options || []}
+                onChange={(answer) => handleAnswerChange(question.id, answer)} // Javobni saqlash
+              />
+            );
+          }
+          return null; // Agar savol `select` yoki `radio` bo'lmasa, hech narsa render qilinmaydi
+        })}
     </div>
   );
 };

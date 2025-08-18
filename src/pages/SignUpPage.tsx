@@ -7,42 +7,89 @@ import useStepProgressAuth from "../hooks/useStepProgressAuth";
 import Step2 from "../components/steps/step-2";
 import Step3 from "../components/steps/step-3";
 import Step4 from "../components/steps/step-4";
+import RegistrationState from "../store/RegistrationState";
+import useRegister from "../hooks/requests/useRegister";
+import useSubmitAnswer from "../hooks/requests/useSubmitAnswer"; // useSubmitAnswer import qilish
+import { toast } from "react-toastify";
+
 const SignUpPage = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [nextStep, setNextStep] = useState<boolean>(false);
   const totalStep = 4;
+
   const { progressData, setProgressData } = useStepProgressAuth();
-  const handleSavePreviusStep = () => {
-    const findStep = progressData.find((step) => step.step === currentStep - 1);
-    findStep.isSuccess = true;
+  const { email, password } = RegistrationState();
+  const { mutateAsync: registerMutate } = useRegister(); // Step 1 uchun register so'rovini yuborish
+  const { mutateAsync: submitAnswerMutate } = useSubmitAnswer(); // Step 2 uchun javob yuborish
+
+  const handleSavePreviousStep = () => {
+    const prev = progressData.find((step) => step.step === currentStep - 1);
+    if (!prev) return;
+    prev.isSuccess = true;
     setProgressData([...progressData]);
   };
-  const incrementCurrentStep = () => {
-    if (currentStep < 4) {
-      setCurrentStep((prevState) => prevState + 1);
+
+  const goNext = () => {
+    toast.success(`Step ${currentStep} successfully completed`);
+    setCurrentStep((s) => Math.min(s + 1, totalStep));
+  };
+
+  const incrementCurrentStep = async () => {
+    if (currentStep === 1) {
+      try {
+        if (!email || !password) {
+          toast.error("Email va parol majburiy.");
+          return;
+        }
+
+        // Step 1 uchun register so'rovini yuborish
+        const res = await registerMutate({ email, password });
+        console.log(res);
+        const userId = res?.data?.data?.id;
+        if (userId) {
+          localStorage.setItem("user_id", String(userId));
+        }
+
+        goNext();
+      } catch (err: any) {
+        const msg =
+          err?.response?.data?.message || err?.message || "Register failed";
+        toast.error(msg);
+      }
+      return;
+    }
+
+    if (currentStep === 2) {
+      // Step 2 uchun savolga javob yuborish
+      await submitAnswerMutate(); // `mutateAsync` chaqirish va barcha javoblarni yuborish
+      goNext();
     }
   };
+
+  const decrementCurrentStep = () => {
+    setCurrentStep((prevState) => Math.max(prevState - 1, 1));
+  };
+
   useEffect(() => {
     if (currentStep !== 1) {
-      handleSavePreviusStep();
+      handleSavePreviousStep();
     }
   }, [currentStep]);
+
   const getCurrentStep = () => {
     switch (currentStep) {
-      case 1: {
+      case 1:
         return <Step1 />;
-      }
-      case 2: {
+      case 2:
         return <Step2 />;
-      }
-      case 3: {
+      case 3:
         return <Step3 />;
-      }
-      case 4: {
+      case 4:
         return <Step4 />;
-      }
+      default:
+        return null;
     }
   };
+
   return (
     <section className="h-screen p-[20px_35px_30px_35px] bg-[#F4F9FD]">
       <div className="flex h-full gap-x-8">
@@ -57,14 +104,16 @@ const SignUpPage = () => {
             <ProgressStepAuth steps={progressData} currentStep={currentStep} />
           </div>
         </div>
-        <div className="w-[100%] flex flex-col justify-between max-w-[70%] rounded-[24px]  bg-white shadow-[0px_6px_rgba(196_203_214_0.5)]">
+
+        <div className="w-[100%] flex flex-col justify-between max-w-[70%] rounded-[24px] bg-white shadow-[0px_6px_rgba(196_203_214_0.5)]">
           <div className="flex flex-col max-w-[403px] w-full mx-auto items-center pt-[55px]">
             <span className="font-bold text-[14px] text-[#3F8CFF]">
               Step {currentStep}/{totalStep}
             </span>
             <h2 className="signin-title">
-              {progressData[currentStep - 1].title}
+              {progressData[currentStep - 1]?.title ?? "Registration"}
             </h2>
+
             <form
               onSubmit={(event) => event.preventDefault()}
               className="flex w-full flex-col gap-y-[15px] mt-[33px]"
@@ -72,13 +121,25 @@ const SignUpPage = () => {
               {getCurrentStep()}
             </form>
           </div>
-          <div className="border-t-2 border-[#E4E6E8] pt-[10px] pb-[10px]">
+
+          <div className="border-t-2 border-[#E4E6E8] pt-[10px] pb-[10px] flex items-center justify-between">
+            {currentStep !== 1 && (
+              <Button
+                variant="small"
+                onClick={decrementCurrentStep}
+                className="flex items-center !bg-transparent !text-bold !text-blue-400 !shadow-none gap-x-3"
+              >
+                <Icon.leftArrowIcon />
+                Previous
+              </Button>
+            )}
+
             <Button
               variant="small"
-              disabled={nextStep}
+              disabled={currentStep === totalStep} // Disable Next button if it's the last step
               onClick={incrementCurrentStep}
-              className={`flex ml-auto mr-10 items-center gap-x-3 ${
-                !nextStep ? "disabled" : ""
+              className={`flex items-center mr-10 gap-x-3 ${
+                currentStep === totalStep ? "disabled" : "ml-auto"
               }`}
             >
               Next Step
