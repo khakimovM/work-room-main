@@ -4,7 +4,7 @@ import { api } from "../../config/axios";
 
 export const useGetProfileQuestions = (step_number: number) => {
   const url = ENDPOINTS.user.profileQuestions(step_number);
-  const { data, isError, isSuccess } = useQuery({
+  const { data, isError, isSuccess, isPending, isFetching } = useQuery({
     queryKey: ["user-profile-questions"],
     queryFn: async () => {
       return await api.get(url);
@@ -14,5 +14,7 @@ export const useGetProfileQuestions = (step_number: number) => {
     data,
     isError,
     isSuccess,
+    isPending,
+    isFetching,
   };
 };

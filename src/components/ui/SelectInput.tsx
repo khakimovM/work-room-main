@@ -1,19 +1,24 @@
 import ReactSelect from "react-select";
 import type { IOptions } from "../steps/step-2";
+
 interface Props {
   question_text: string;
   options: IOptions[];
-  onChange: (answer: string) => void; // `onChange` prop
+  onChange: (answer: string) => void;
 }
 
 const Select = ({ question_text, options, onChange }: Props) => {
+  // ReactSelect uchun mos formatdagi options yaratish
   const optionsData = options?.map((option) => ({
     value: option.option_value,
     label: option.option_text,
   }));
 
+  // Tanlangan option dan faqat value olish
   const handleSelectChange = (selectedOption: any) => {
-    onChange(selectedOption.value); // Javobni yuborish
+    if (selectedOption) {
+      onChange(selectedOption.value); // Tanlangan option qiymatini yuborish
+    }
   };
 
   return (
@@ -21,14 +26,14 @@ const Select = ({ question_text, options, onChange }: Props) => {
       <label className="font-semibold text-[#7D8592]">{question_text}</label>
       <ReactSelect
         options={optionsData}
-        onChange={handleSelectChange}
+        onChange={handleSelectChange} // Tanlangan option qiymatini yuborish
         styles={{
           indicatorSeparator: (base) => {
             return {
               listStyle: "none",
             };
           },
-          control(base, props) {
+          control(base) {
             return {
               ...base,
               color: "red",
@@ -38,7 +43,7 @@ const Select = ({ question_text, options, onChange }: Props) => {
               padding: "6px 12px",
             };
           },
-          placeholder(base, props) {
+          placeholder(base) {
             return {
               ...base,
               color: "#7D8592",

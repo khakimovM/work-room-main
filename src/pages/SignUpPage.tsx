@@ -5,12 +5,12 @@ import Icon from "../components/ui/Icon";
 import ProgressStepAuth from "../components/ui/progress-step-auth";
 import useStepProgressAuth from "../hooks/useStepProgressAuth";
 import Step2 from "../components/steps/step-2";
-import Step3 from "../components/steps/step-3";
 import Step4 from "../components/steps/step-4";
 import RegistrationState from "../store/RegistrationState";
 import useRegister from "../hooks/requests/useRegister";
 import useSubmitAnswer from "../hooks/requests/useSubmitAnswer"; // useSubmitAnswer import qilish
 import { toast } from "react-toastify";
+import { Step3 } from "../components/steps/step-3";
 
 const SignUpPage = () => {
   const [currentStep, setCurrentStep] = useState(1);
