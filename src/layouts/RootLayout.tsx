@@ -4,9 +4,11 @@ import { Outlet } from "react-router-dom";
 const RootLayout = () => {
   return (
     <>
-      <div className="flex bg-[#F4F9FD] w-full h-screen">
-        <Sidebar />
-        <div>
+      <div className="flex gap-5 w-full px-4 bg-[#F4F9FD] relative ">
+        <div className="fixed top-0 left-0">
+          <Sidebar />
+        </div>
+        <div className="qolgan ml-[250px]">
           <Header />
           <Outlet />
         </div>

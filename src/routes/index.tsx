@@ -5,6 +5,7 @@ import DashboardPage from "../pages/DashboardPage";
 import SignInPage from "../pages/SignInPage";
 import SignUpPage from "../pages/SignUpPage";
 import ProtectedRouteComponent from "../components/protected.route";
+import Profil from "../pages/ProfilePage";
 
 export const routes = createBrowserRouter([
   {
@@ -12,15 +13,15 @@ export const routes = createBrowserRouter([
     element: <AppWrapperLayout />,
     children: [
       {
-        element: (
-          <ProtectedRouteComponent>
-            <RootLayout />
-          </ProtectedRouteComponent>
-        ),
+        element: <RootLayout />,
         children: [
           {
             index: true,
             element: <DashboardPage />,
+          },
+          {
+            path: "/profile",
+            element: <Profil />,
           },
         ],
       },
