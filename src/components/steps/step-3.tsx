@@ -2,18 +2,18 @@ import { useEffect, useState } from "react";
 import Input from "../ui/Input";
 import UniversalInput from "../ui/SelectInput";
 import { useGetProfileQuestions } from "../../hooks/requests/useGetProfileQuestions";
-import { useStep3Store } from "../../store/Step3Store"; // Zustand store
+import { useStep3Store } from "../../store/Step3Store";
 
 export const Step3 = () => {
-  const { answers, setAnswer } = useStep3Store(); // Zustand store orqali javoblarni saqlash
+  const { answers, setAnswer } = useStep3Store();
   const { data, isFetching } = useGetProfileQuestions(3);
   const questions = data?.data || [];
 
-  const [selectedButton, setSelectedButton] = useState<string | null>(null); // Tanlangan buttonni saqlash
+  const [selectedButton, setSelectedButton] = useState<string | null>(null);
 
   const handleAnswerChange = (questionId: string, answer: string) => {
-    setAnswer(questionId, answer); // Javobni Zustand store`ga saqlash
-    setSelectedButton(answer); // Tanlangan buttonni saqlash
+    setAnswer(questionId, answer);
+    setSelectedButton(answer);
   };
 
   if (isFetching) {
@@ -46,7 +46,7 @@ export const Step3 = () => {
                 key={q.id}
                 question_text={q.question_text}
                 options={q.options || []}
-                onChange={(answer: string) => handleAnswerChange(q.id, answer)} // Javobni saqlash
+                onChange={(answer: string) => handleAnswerChange(q.id, answer)}
               />
             );
 
@@ -67,7 +67,7 @@ export const Step3 = () => {
                             ? "bg-[#3F8CFF] text-white"
                             : "bg-white text-[#7D8592] border border-[#D8E0F0]"
                         }`}
-                      onClick={() => handleAnswerChange(q.id, opt.option_value)} // Tanlangan buttonni saqlash
+                      onClick={() => handleAnswerChange(q.id, opt.option_value)}
                     >
                       {opt.option_text}
                     </button>

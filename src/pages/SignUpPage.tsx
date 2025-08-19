@@ -8,20 +8,23 @@ import Step2 from "../components/steps/step-2";
 import Step4 from "../components/steps/step-4";
 import RegistrationState from "../store/RegistrationState";
 import useRegister from "../hooks/requests/useRegister";
-import useSubmitAnswer from "../hooks/requests/useSubmitAnswer"; // useSubmitAnswer import qilish
+import useSubmitAnswer from "../hooks/requests/useSubmitAnswer";
 import { toast } from "react-toastify";
 import { Step3 } from "../components/steps/step-3";
 import useSubmitAnswerStep3 from "../hooks/requests/useSubmiAnswerStep3";
+import { useNavigate, useNavigation } from "react-router-dom";
+import { api } from "../config/axios";
 
 const SignUpPage = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const totalStep = 4;
+  const navigate = useNavigate();
 
   const { progressData, setProgressData } = useStepProgressAuth();
   const { email, password } = RegistrationState();
-  const { mutateAsync: registerMutate } = useRegister(); // Step 1 uchun register so'rovini yuborish
-  const { mutateAsync: submitAnswerMutate } = useSubmitAnswer(); // Step 2 va Step 3 uchun javob yuborish
-  const { mutateAsync: submitAnswerMutateStep3 } = useSubmitAnswerStep3(); // Step 2 va Step 3 uchun javob yuborish
+  const { mutateAsync: registerMutate } = useRegister();
+  const { mutateAsync: submitAnswerMutate } = useSubmitAnswer();
+  const { mutateAsync: submitAnswerMutateStep3 } = useSubmitAnswerStep3();
 
   const handleSavePreviousStep = () => {
     const prev = progressData.find((step) => step.step === currentStep - 1);
@@ -43,7 +46,6 @@ const SignUpPage = () => {
           return;
         }
 
-        // Step 1 uchun register so'rovini yuborish
         const res = await registerMutate({ email, password });
         console.log(res);
         const userId = res?.data?.data?.id;
@@ -61,15 +63,21 @@ const SignUpPage = () => {
     }
 
     if (currentStep === 2) {
-      // Step 2 uchun savolga javob yuborish
-      await submitAnswerMutate(); // `mutateAsync` chaqirish va barcha javoblarni yuborish
+      await submitAnswerMutate();
       goNext();
     }
 
     if (currentStep === 3) {
-      // Step 3 uchun javoblarni yuborish
-      await submitAnswerMutateStep3(); // `mutateAsync` chaqirish va barcha javoblarni yuborish
+      await submitAnswerMutateStep3();
       goNext();
+    }
+    if (currentStep === 4) {
+      api.post("/auth/check-step-successfull-complate", {
+        user_id: localStorage.getItem("user_id"),
+        step: 3,
+      });
+      navigate("/");
+      toast.success("You successfully registrated");
     }
   };
 
@@ -90,7 +98,7 @@ const SignUpPage = () => {
       case 2:
         return <Step2 />;
       case 3:
-        return <Step3 />; // Step 3ni ko'rsatish
+        return <Step3 />;
       case 4:
         return <Step4 />;
       default:
@@ -144,7 +152,7 @@ const SignUpPage = () => {
 
             <Button
               variant="small"
-              disabled={currentStep === totalStep} // Disable Next button if it's the last step
+              disabled={currentStep === totalStep + 1} // Disable Next button if it's the last step
               onClick={incrementCurrentStep}
               className={`flex items-center mr-10 gap-x-3 ${
                 currentStep === totalStep ? "disabled" : "ml-auto"
