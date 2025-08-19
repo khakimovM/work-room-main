@@ -1,16 +1,19 @@
-import { useGetProfileQuestions } from "../../hooks/requests/useGetProfileQuestions";
-import { useStep3Store } from "../../store/Step3Store";
+import { useEffect, useState } from "react";
 import Input from "../ui/Input";
-import RadioGroup from "../ui/RadioGroup";
-import Select from "../ui/SelectInput";
+import UniversalInput from "../ui/SelectInput";
+import { useGetProfileQuestions } from "../../hooks/requests/useGetProfileQuestions";
+import { useStep3Store } from "../../store/Step3Store"; // Zustand store
 
 export const Step3 = () => {
   const { answers, setAnswer } = useStep3Store(); // Zustand store orqali javoblarni saqlash
   const { data, isFetching } = useGetProfileQuestions(3);
   const questions = data?.data || [];
 
+  const [selectedButton, setSelectedButton] = useState<string | null>(null); // Tanlangan buttonni saqlash
+
   const handleAnswerChange = (questionId: string, answer: string) => {
     setAnswer(questionId, answer); // Javobni Zustand store`ga saqlash
+    setSelectedButton(answer); // Tanlangan buttonni saqlash
   };
 
   if (isFetching) {
@@ -39,7 +42,7 @@ export const Step3 = () => {
 
           case "select":
             return (
-              <Select
+              <UniversalInput
                 key={q.id}
                 question_text={q.question_text}
                 options={q.options || []}
@@ -47,14 +50,30 @@ export const Step3 = () => {
               />
             );
 
-          case "radio":
+          case "checkbox":
             return (
-              <RadioGroup
-                key={q.id}
-                question_text={q.question_text}
-                options={q.options || []}
-                onChange={(answer: string) => handleAnswerChange(q.id, answer)} // Javobni saqlash
-              />
+              <div key={q.id} className="mt-7">
+                <label className="font-semibold text-[#7D8592]">
+                  {q.question_text}
+                </label>
+                <div className="grid grid-cols-4 gap-4 mt-[7px]">
+                  {q.options?.map((opt) => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      className={`w-[100px] h-[40px] text-center text-[14px] font-normal rounded-[10px] 
+                        ${
+                          selectedButton === opt.option_value
+                            ? "bg-[#3F8CFF] text-white"
+                            : "bg-white text-[#7D8592] border border-[#D8E0F0]"
+                        }`}
+                      onClick={() => handleAnswerChange(q.id, opt.option_value)} // Tanlangan buttonni saqlash
+                    >
+                      {opt.option_text}
+                    </button>
+                  ))}
+                </div>
+              </div>
             );
 
           default:

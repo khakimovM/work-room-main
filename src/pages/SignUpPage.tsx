@@ -11,6 +11,7 @@ import useRegister from "../hooks/requests/useRegister";
 import useSubmitAnswer from "../hooks/requests/useSubmitAnswer"; // useSubmitAnswer import qilish
 import { toast } from "react-toastify";
 import { Step3 } from "../components/steps/step-3";
+import useSubmitAnswerStep3 from "../hooks/requests/useSubmiAnswerStep3";
 
 const SignUpPage = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -19,7 +20,8 @@ const SignUpPage = () => {
   const { progressData, setProgressData } = useStepProgressAuth();
   const { email, password } = RegistrationState();
   const { mutateAsync: registerMutate } = useRegister(); // Step 1 uchun register so'rovini yuborish
-  const { mutateAsync: submitAnswerMutate } = useSubmitAnswer(); // Step 2 uchun javob yuborish
+  const { mutateAsync: submitAnswerMutate } = useSubmitAnswer(); // Step 2 va Step 3 uchun javob yuborish
+  const { mutateAsync: submitAnswerMutateStep3 } = useSubmitAnswerStep3(); // Step 2 va Step 3 uchun javob yuborish
 
   const handleSavePreviousStep = () => {
     const prev = progressData.find((step) => step.step === currentStep - 1);
@@ -63,6 +65,12 @@ const SignUpPage = () => {
       await submitAnswerMutate(); // `mutateAsync` chaqirish va barcha javoblarni yuborish
       goNext();
     }
+
+    if (currentStep === 3) {
+      // Step 3 uchun javoblarni yuborish
+      await submitAnswerMutateStep3(); // `mutateAsync` chaqirish va barcha javoblarni yuborish
+      goNext();
+    }
   };
 
   const decrementCurrentStep = () => {
@@ -82,7 +90,7 @@ const SignUpPage = () => {
       case 2:
         return <Step2 />;
       case 3:
-        return <Step3 />;
+        return <Step3 />; // Step 3ni ko'rsatish
       case 4:
         return <Step4 />;
       default:
